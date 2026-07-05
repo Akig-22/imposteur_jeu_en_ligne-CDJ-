@@ -23,13 +23,12 @@
         
         <div id="turn-info" style="display:none;" class="space-y-4">
             <p id="tour-display" class="text-xl text-blue-600 font-bold">Tour : 1</p>
-            <p id="turn-display" class="text-lg text-red-600 font-bold">C'est au tour de : ...</p>
+            <p id="turn-display" class="text-lg text-red-600 font-bold">En attente...</p>
+            
             <div class="grid grid-cols-1 gap-2">
                 <button onclick="passTurn()" class="bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg">J'ai fini mon indice</button>
                 <button onclick="addTour()" class="bg-gray-500 hover:bg-gray-600 text-white py-2 rounded-lg">Ajouter un tour</button>
-                
                 <button onclick="socket.emit('end-debate')" class="bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded-lg font-bold">Finir le débat</button>
-                
                 <button id="revealBtn" onclick="endGame()" style="display:none;" class="bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg font-bold">Révéler l'Imposteur</button>
             </div>
         </div>
@@ -60,7 +59,6 @@
         function endGame() { socket.emit('end-game'); }
         function resetGame() { socket.emit('reset-game'); }
 
-        // Écouteur pour afficher le bouton de révélation
         socket.on('enable-reveal-button', () => {
             document.getElementById('revealBtn').style.display = 'block';
         });
@@ -77,9 +75,16 @@
             document.getElementById('turn-info').style.display = 'block';
         });
 
+        // MODIFIÉ : Gestion du tour actif avec comparaison d'ID
         socket.on('next-turn', (data) => {
             document.getElementById('tour-display').innerText = "Tour actuel : " + data.tour;
-            document.getElementById('turn-display').innerText = "C'est au tour de : " + data.name;
+            
+            if (data.id === socket.id) {
+                document.getElementById('turn-display').innerHTML = 
+                    "<span class='text-green-600 font-black text-2xl'>C'est à TON tour de jouer !</span>";
+            } else {
+                document.getElementById('turn-display').innerText = "C'est au tour de : " + data.name;
+            }
         });
 
         socket.on('game-over', (results) => {
