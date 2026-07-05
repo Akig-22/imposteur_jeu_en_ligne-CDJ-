@@ -2,49 +2,44 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>L'Imposteur Chrétien</title>
-    <style>
-        body { font-family: sans-serif; text-align: center; padding: 20px; }
-        #status { font-size: 1.2em; margin-bottom: 20px; }
-        #turn-display { font-weight: bold; color: #d9534f; margin-top: 15px; font-size: 1.3em; }
-        #player-list { color: #555; font-style: italic; margin-bottom: 15px; }
-        .control-btns { margin-top: 10px; }
-        button { margin: 5px; padding: 10px 15px; cursor: pointer; }
-    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <h1>L'Imposteur Chrétien</h1>
+<body class="bg-gray-100 min-h-screen p-4 flex flex-col items-center">
 
-    <div id="setup">
-        <input id="name" placeholder="Ton nom">
-        <button onclick="joinGame()">Entrer dans la partie</button>
+    <h1 class="text-4xl font-bold text-gray-800 my-6">L'Imposteur Chrétien</h1>
+
+    <div id="setup" class="bg-white p-8 rounded-xl shadow-lg w-full max-w-sm">
+        <input id="name" placeholder="Ton nom" class="w-full border border-gray-300 rounded-lg p-3 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <button onclick="joinGame()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition">Entrer dans la partie</button>
     </div>
 
-    <div id="game" style="display:none;">
-        <p>Joueurs présents : <span id="player-list"></span></p>
-        <div id="status">En attente des autres joueurs...</div>
-        <button id="startButton" onclick="startGame()">Lancer la partie</button>
+    <div id="game" style="display:none;" class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
+        <p class="text-gray-600 mb-2">Joueurs présents : <span id="player-list" class="font-semibold text-gray-800"></span></p>
+        <div id="status" class="text-lg text-gray-700 mb-6 font-medium">En attente des autres joueurs...</div>
         
-        <div id="turn-info" style="display:none;">
-            <p id="tour-display">Tour : 1</p>
-            <p id="turn-display">C'est au tour de : ...</p>
-            <div class="control-btns">
-                <button onclick="passTurn()">J'ai fini mon indice</button>
-                <button onclick="addTour()">Ajouter un tour</button>
-                <button onclick="endGame()" style="background: red; color: white;">Révéler l'Imposteur</button>
+        <button id="startButton" onclick="startGame()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition mb-4">Lancer la partie</button>
+        
+        <div id="turn-info" style="display:none;" class="space-y-4">
+            <p id="tour-display" class="text-xl text-blue-600 font-bold">Tour : 1</p>
+            <p id="turn-display" class="text-lg text-red-600 font-bold">C'est au tour de : ...</p>
+            <div class="grid grid-cols-1 gap-2">
+                <button onclick="passTurn()" class="bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg">J'ai fini mon indice</button>
+                <button onclick="addTour()" class="bg-gray-500 hover:bg-gray-600 text-white py-2 rounded-lg">Ajouter un tour</button>
+                <button onclick="endGame()" class="bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg font-bold">Révéler l'Imposteur</button>
             </div>
         </div>
     </div>
 
-    <div id="results" style="display:none;">
-        <h2>Résultats de la partie</h2>
-        <div id="result-list"></div>
-        <button onclick="resetGame()">Relancer une nouvelle partie</button>
+    <div id="results" style="display:none;" class="bg-white p-8 rounded-xl shadow-lg w-full max-w-sm">
+        <h2 class="text-2xl font-bold mb-4">Résultats de la partie</h2>
+        <div id="result-list" class="text-left mb-6 space-y-2"></div>
+        <button onclick="resetGame()" class="w-full bg-blue-600 text-white py-3 rounded-lg">Relancer une nouvelle partie</button>
     </div>
 
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <script>
-        // MODIFIÉ ICI : Utilisation de io() sans arguments pour une connexion automatique
         const socket = io(); 
 
         function joinGame() {
@@ -67,7 +62,7 @@
         });
 
         socket.on('game-started', (data) => {
-            document.getElementById('status').innerHTML = `<h3>Rôle : ${data.role}</h3><p style="font-size: 1.4em;">${data.word}</p>`;
+            document.getElementById('status').innerHTML = `<h3 class="text-xl font-bold mb-2">${data.role}</h3><p class="text-2xl">${data.word}</p>`;
             document.getElementById('startButton').style.display = 'none';
             document.getElementById('turn-info').style.display = 'block';
         });
@@ -80,9 +75,9 @@
         socket.on('game-over', (results) => {
             document.getElementById('game').style.display = 'none';
             document.getElementById('results').style.display = 'block';
-            let html = "<ul>";
+            let html = "<ul class='list-disc pl-5'>";
             results.forEach(p => {
-                html += `<li>${p.name} : <strong>${p.role}</strong></li>`;
+                html += `<li class='text-lg'>${p.name} : <span class='font-bold'>${p.role}</span></li>`;
             });
             document.getElementById('result-list').innerHTML = html + "</ul>";
         });
