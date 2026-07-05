@@ -27,7 +27,10 @@
             <div class="grid grid-cols-1 gap-2">
                 <button onclick="passTurn()" class="bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg">J'ai fini mon indice</button>
                 <button onclick="addTour()" class="bg-gray-500 hover:bg-gray-600 text-white py-2 rounded-lg">Ajouter un tour</button>
-                <button onclick="endGame()" class="bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg font-bold">Révéler l'Imposteur</button>
+                
+                <button onclick="socket.emit('end-debate')" class="bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded-lg font-bold">Finir le débat</button>
+                
+                <button id="revealBtn" onclick="endGame()" style="display:none;" class="bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg font-bold">Révéler l'Imposteur</button>
             </div>
         </div>
     </div>
@@ -56,6 +59,13 @@
         function addTour() { socket.emit('add-tour'); }
         function endGame() { socket.emit('end-game'); }
         function resetGame() { socket.emit('reset-game'); }
+
+        // Écouteur pour afficher le bouton de révélation
+        socket.on('enable-reveal-button', () => {
+            document.getElementById('revealBtn').style.display = 'block';
+        });
+
+        socket.on('status-msg', (msg) => { alert(msg); });
 
         socket.on('update-player-list', (names) => {
             document.getElementById('player-list').innerText = names.join(", ");

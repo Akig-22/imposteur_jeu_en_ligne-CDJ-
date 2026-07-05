@@ -3,7 +3,6 @@ const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
 
-// MODIFIÉ ICI : suppression de './main/' pour pointer vers le fichier à la racine
 const themes = require('./mots.js'); 
 
 app.use(express.static(__dirname));
@@ -21,7 +20,8 @@ io.on('connection', (socket) => {
     });
 
     socket.on('start-game', () => {
-        if (players.length >= 3) {
+        // Tu peux remettre >= 3 ici quand tu joueras avec des amis
+        if (players.length >= 1) { 
             turnIndex = 0;
             tourActuel = 1;
             
@@ -52,6 +52,12 @@ io.on('connection', (socket) => {
         io.emit('status-msg', "Un tour de table supplémentaire a été ajouté !");
     });
 
+    // NOUVEAU : Fin du débat
+    socket.on('end-debate', () => {
+        io.emit('status-msg', "Le débat est clos ! Vous pouvez maintenant révéler l'imposteur.");
+        io.emit('enable-reveal-button');
+    });
+
     socket.on('end-game', () => {
         io.emit('game-over', players.map(p => ({ name: p.name, role: p.role })));
     });
@@ -67,6 +73,5 @@ io.on('connection', (socket) => {
     });
 });
 
-// Port dynamique pour le déploiement cloud
 const port = process.env.PORT || 3000;
 http.listen(port, '0.0.0.0', () => console.log(`Serveur actif sur le port ${port}`));
