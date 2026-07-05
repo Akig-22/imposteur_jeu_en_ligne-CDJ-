@@ -44,7 +44,8 @@
 
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <script>
-        const socket = io("http://localhost:3000");
+        // MODIFIÉ ICI : Utilisation de io() sans arguments pour une connexion automatique
+        const socket = io(); 
 
         function joinGame() {
             const name = document.getElementById('name').value;
@@ -76,7 +77,6 @@
             document.getElementById('turn-display').innerText = "C'est au tour de : " + data.name;
         });
 
-        // Révélation finale
         socket.on('game-over', (results) => {
             document.getElementById('game').style.display = 'none';
             document.getElementById('results').style.display = 'block';
@@ -87,7 +87,6 @@
             document.getElementById('result-list').innerHTML = html + "</ul>";
         });
 
-        // Retour à l'accueil
         socket.on('reset-ui', () => { location.reload(); });
     </script>
 </body>
