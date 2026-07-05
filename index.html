@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>L'Imposteur Chrétien</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding: 20px; }
+        #status { font-size: 1.2em; margin-bottom: 20px; }
+        #turn-display { font-weight: bold; color: #d9534f; margin-top: 15px; font-size: 1.3em; }
+        #player-list { color: #555; font-style: italic; margin-bottom: 15px; }
+        .control-btns { margin-top: 10px; }
+        button { margin: 5px; padding: 10px 15px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>L'Imposteur Chrétien</h1>
+
+    <div id="setup">
+        <input id="name" placeholder="Ton nom">
+        <button onclick="joinGame()">Entrer dans la partie</button>
+    </div>
+
+    <div id="game" style="display:none;">
+        <p>Joueurs présents : <span id="player-list"></span></p>
+        <div id="status">En attente des autres joueurs...</div>
+        <button id="startButton" onclick="startGame()">Lancer la partie</button>
+        
+        <div id="turn-info" style="display:none;">
+            <p id="tour-display">Tour : 1</p>
+            <p id="turn-display">C'est au tour de : ...</p>
+            <div class="control-btns">
+                <button onclick="passTurn()">J'ai fini mon indice</button>
+                <button onclick="addTour()">Ajouter un tour</button>
+                <button onclick="endGame()" style="background: red; color: white;">Révéler l'Imposteur</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="results" style="display:none;">
+        <h2>Résultats de la partie</h2>
+        <div id="result-list"></div>
+        <button onclick="resetGame()">Relancer une nouvelle partie</button>
+    </div>
+
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script>
+        const socket = io("http://localhost:3000");
+
+        function joinGame() {
+            const name = document.getElementById('name').value;
+            if(name.trim() !== "") {
+                socket.emit('join-game', name);
+                document.getElementById('setup').style.display = 'none';
+                document.getElementById('game').style.display = 'block';
+            }
+        }
+
+        function startGame() { socket.emit('start-game'); }
+        function passTurn() { socket.emit('pass-turn'); }
+        function addTour() { socket.emit('add-tour'); }
+        function endGame() { socket.emit('end-game'); }
+        function resetGame() { socket.emit('reset-game'); }
+
+        socket.on('update-player-list', (names) => {
+            document.getElementById('player-list').innerText = names.join(", ");
+        });
+
+        socket.on('game-started', (data) => {
+            document.getElementById('status').innerHTML = `<h3>Rôle : ${data.role}</h3><p style="font-size: 1.4em;">${data.word}</p>`;
+            document.getElementById('startButton').style.display = 'none';
+            document.getElementById('turn-info').style.display = 'block';
+        });
+
+        socket.on('next-turn', (data) => {
+            document.getElementById('tour-display').innerText = "Tour actuel : " + data.tour;
+            document.getElementById('turn-display').innerText = "C'est au tour de : " + data.name;
+        });
+
+        // Révélation finale
+        socket.on('game-over', (results) => {
+            document.getElementById('game').style.display = 'none';
+            document.getElementById('results').style.display = 'block';
+            let html = "<ul>";
+            results.forEach(p => {
+                html += `<li>${p.name} : <strong>${p.role}</strong></li>`;
+            });
+            document.getElementById('result-list').innerHTML = html + "</ul>";
+        });
+
+        // Retour à l'accueil
+        socket.on('reset-ui', () => { location.reload(); });
+    </script>
+</body>
+</html>
